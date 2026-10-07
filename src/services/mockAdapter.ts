@@ -8,9 +8,9 @@ import type { IBook, IBookPayload } from '../types/book';
 import type { IAuthUser, ILoginPayload } from '../types/auth';
 
 const DEMO_ACCOUNT: ILoginPayload & { name: string } = {
-  email: 'admin@lskk.dev',
+  email: 'admin@gmail.com',
   password: 'rahasia123',
-  name: 'Admin LSKK',
+  name: 'Admin',
 };
 
 let books: IBook[] = [
@@ -211,6 +211,14 @@ export const mockAdapter = async (
     const updated: IBook = { ...books[index], ...body };
     books[index] = updated;
     return ok(config, updated, 'Catatan berhasil diperbarui');
+  }
+
+  // DELETE /books/:id
+  if (method === 'DELETE' && idMatch) {
+    const index = books.findIndex((item) => item.id === Number(idMatch[1]));
+    if (index === -1) return fail(config, 404, 'Catatan tidak ditemukan');
+    books.splice(index, 1);
+    return ok(config, null, 'Catatan berhasil dihapus');
   }
 
   return fail(config, 404, 'Endpoint tidak ditemukan');

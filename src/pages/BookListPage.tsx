@@ -1,8 +1,8 @@
 // src/pages/BookListPage.tsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { fetchBooks } from '../services/bookService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteBook, fetchBooks } from '../services/bookService';
 import { NoticeBanner } from '../components/NoticeBanner';
 import type { ImetaPagination } from '../types/api';
 
@@ -10,12 +10,29 @@ const PAGE_SIZE = 5;
 
 const BookListPage = () => {
   const [page, setPage] = useState(1);
+  const [notice, setNotice] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data, isPending, isError, error, isPlaceholderData } = useQuery({
     queryKey: ['books', page, PAGE_SIZE],
     queryFn: () => fetchBooks(page, PAGE_SIZE),
     placeholderData: (previousData) => previousData,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteBook,
+    onSuccess: (response) => {
+      setNotice(response.message);
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+    },
+    onError: (err) => setNotice(err.message),
+  });
+
+  const handleDelete = (id: number) => {
+    if (!window.confirm('Yakin hapus catatan ini?')) return;
+    setNotice(null);
+    deleteMutation.mutate(id);
+  };
 
   const meta: ImetaPagination | undefined = data?.meta;
 
@@ -32,6 +49,14 @@ const BookListPage = () => {
       </div>
 
       {isError && <NoticeBanner tone="error" message={error.message} />}
+      {notice && (
+        <div className="mb-4">
+          <NoticeBanner
+            tone={deleteMutation.isSuccess ? 'success' : 'error'}
+            message={notice}
+          />
+        </div>
+      )}
 
       {isPending ? (
         <p className="text-sm text-gray-500">Memuat data...</p>
@@ -76,12 +101,22 @@ const BookListPage = () => {
                       {book.category}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Link
-                        to={`/books/${book.id}/edit`}
-                        className="text-sm font-semibold text-blue-600 hover:underline"
-                      >
-                        Edit
-                      </Link>
+                      <span className="inline-flex items-center gap-3">
+                        <Link
+                          to={`/books/${book.id}/edit`}
+                          className="text-sm font-semibold text-blue-600 hover:underline"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(book.id)}
+                          disabled={deleteMutation.isPending}
+                          className="text-sm font-semibold text-red-600 hover:underline disabled:opacity-50"
+                        >
+                          Hapus
+                        </button>
+                      </span>
                     </td>
                   </tr>
                 ))}

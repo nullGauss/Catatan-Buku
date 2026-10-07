@@ -40,3 +40,10 @@ export const updateBook = async (
   );
   return res.data;
 };
+
+export const deleteBook = async (
+  id: number,
+): Promise<IResponseEntity<null>> => {
+  const res = await axiosInstance.delete<IResponseEntity<null>>(`/books/${id}`);
+  return res.data;
+};

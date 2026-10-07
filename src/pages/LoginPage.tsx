@@ -52,7 +52,7 @@ const LoginPage = () => {
       <div className="w-full max-w-sm rounded-lg border bg-white p-6 shadow-sm">
         <h1 className="mb-1 text-xl font-bold text-gray-800">Masuk</h1>
         <p className="mb-4 text-sm text-gray-500">
-          Login demo: admin@lskk.dev / rahasia123
+          Login demo: admin@gmail.com / rahasia123
         </p>
 
         {errorMessage && (
