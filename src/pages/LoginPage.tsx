@@ -51,9 +51,11 @@ const LoginPage = () => {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm rounded-lg border bg-white p-6 shadow-sm">
         <h1 className="mb-1 text-xl font-bold text-gray-800">Masuk</h1>
-        <p className="mb-4 text-sm text-gray-500">
-          Login demo: admin@gmail.com / rahasia123
-        </p>
+        {import.meta.env.VITE_USE_MOCK === 'true' && (
+          <p className="mb-4 text-sm text-gray-500">
+            Login demo: admin@gmail.com / rahasia123
+          </p>
+        )}
 
         {errorMessage && (
           <Alert

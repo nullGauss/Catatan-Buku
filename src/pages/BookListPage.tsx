@@ -19,7 +19,7 @@ const BookListPage = () => {
 
   const { data, isFetching, isError, error, isPlaceholderData } = useQuery({
     queryKey: ['books', page, PAGE_SIZE],
-    queryFn: () => fetchBooks(page, PAGE_SIZE),
+    queryFn: () => fetchBooks({ page, limit: PAGE_SIZE }),
     placeholderData: (previousData) => previousData,
   });
 
