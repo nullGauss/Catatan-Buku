@@ -1,6 +1,6 @@
 // src/pages/BookFormPage.tsx
 import { useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,7 +24,10 @@ type BookFormValues = z.infer<typeof bookSchema>;
 
 const BookFormPage = () => {
   const { id } = useParams<{ id: string }>();
-  const bookId = id ? Number(id) : null;
+  const rawId = id ? Number(id) : null;
+  const isInvalidId =
+    rawId !== null && (!Number.isInteger(rawId) || rawId <= 0);
+  const bookId = isInvalidId ? null : rawId;
   const isEdit = bookId !== null;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -76,6 +79,11 @@ const BookFormPage = () => {
   });
 
   const onSubmit = (values: BookFormValues) => mutation.mutate(values);
+
+  // Id buku bukan angka valid → lempar ke halaman utama
+  if (isInvalidId) {
+    return <Navigate to="/" replace />;
+  }
 
   if (isEdit && isLoadingDetail) {
     return (

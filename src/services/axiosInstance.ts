@@ -28,6 +28,9 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
     if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        useAuthStore.getState().logout();
+      }
       const body = error.response?.data as
         Partial<IResponseEntity<unknown>> | undefined;
       const raw = body?.message;

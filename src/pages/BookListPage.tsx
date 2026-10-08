@@ -25,9 +25,19 @@ const BookListPage = () => {
 
   const deleteMutation = useMutation({
     mutationFn: deleteBook,
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       message.success(response.message);
-      queryClient.invalidateQueries({ queryKey: ['books'] });
+      await queryClient.invalidateQueries({ queryKey: ['books'] });
+      // Jika baris terakhir di halaman terakhir dihapus, mundur satu halaman
+      const fresh = queryClient.getQueryData<{ meta?: ImetaPagination }>([
+        'books',
+        page,
+        PAGE_SIZE,
+      ]);
+      const totalPages = fresh?.meta?.totalPages;
+      if (totalPages !== undefined && page > totalPages) {
+        setPage(Math.max(1, totalPages));
+      }
     },
     onError: (err) => message.error(err.message),
   });
