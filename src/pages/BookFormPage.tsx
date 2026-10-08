@@ -65,6 +65,9 @@ const BookFormPage = () => {
     onSuccess: async (response) => {
       message.success(response.message);
       await queryClient.invalidateQueries({ queryKey: ['books'] });
+      if (isEdit && bookId) {
+        await queryClient.invalidateQueries({ queryKey: ['book', bookId] });
+      }
       if (!isEdit) {
         // Setelah tambah, kembali ke list
         navigate('/', { replace: true });

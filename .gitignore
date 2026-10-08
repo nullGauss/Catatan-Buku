@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 
-# Rahasia 
+# Rahasia (Required folder tambahan untuk ai)
 .env
 .env.*
 !.env.example
