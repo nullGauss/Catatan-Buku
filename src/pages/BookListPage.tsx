@@ -1,5 +1,5 @@
 // src/pages/BookListPage.tsx
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, App as AntApp, Button, Popconfirm } from 'antd';
@@ -43,6 +43,12 @@ const BookListPage = () => {
   });
 
   const meta: ImetaPagination | undefined = data?.meta;
+
+  const { mutate: mutateDelete, isPending: isDeleting } = deleteMutation;
+  const handleDelete = useCallback(
+    (id: number) => mutateDelete(id),
+    [mutateDelete],
+  );
 
   const columns = useMemo<GridColDef<IBook>[]>(
     () => [
@@ -99,14 +105,9 @@ const BookListPage = () => {
               okText="Hapus"
               cancelText="Batal"
               okButtonProps={{ danger: true }}
-              onConfirm={() => deleteMutation.mutate(params.row.id)}
+              onConfirm={() => handleDelete(params.row.id)}
             >
-              <Button
-                type="link"
-                size="small"
-                danger
-                disabled={deleteMutation.isPending}
-              >
+              <Button type="link" size="small" danger disabled={isDeleting}>
                 Hapus
               </Button>
             </Popconfirm>
@@ -114,7 +115,7 @@ const BookListPage = () => {
         ),
       },
     ],
-    [navigate, deleteMutation],
+    [navigate, handleDelete, isDeleting],
   );
 
   return (
@@ -135,7 +136,7 @@ const BookListPage = () => {
           rows={data?.data ?? []}
           columns={columns}
           getRowId={(row) => row.id}
-          loading={isFetching || deleteMutation.isPending}
+          loading={isFetching || isDeleting}
           paginationMode="server"
           rowCount={meta?.totalData ?? 0}
           paginationModel={{ page: page - 1, pageSize: PAGE_SIZE }}

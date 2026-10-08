@@ -1,10 +1,9 @@
 // src/components/AppLayout.tsx
-import { memo } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { Button } from 'antd';
 import { useAuthStore } from '../store/authStore';
 
-const AppLayoutComponent = () => {
+export const AppLayout = () => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
@@ -35,5 +34,3 @@ const AppLayoutComponent = () => {
     </div>
   );
 };
-
-export const AppLayout = memo(AppLayoutComponent);
