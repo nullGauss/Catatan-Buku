@@ -1,9 +1,9 @@
 // src/components/AppLayout.tsx
-import { memo } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Button } from 'antd';
 import { useAuthStore } from '../store/authStore';
 
-const AppLayoutComponent = () => {
+export const AppLayout = () => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
@@ -22,12 +22,9 @@ const AppLayoutComponent = () => {
           </Link>
           <div className="flex items-center gap-3 text-sm">
             <span className="text-gray-600">{user?.name}</span>
-            <button
-              onClick={handleLogout}
-              className="rounded-md border border-red-300 px-3 py-1 text-red-600 hover:bg-red-50"
-            >
+            <Button size="small" danger onClick={handleLogout}>
               Keluar
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -37,5 +34,3 @@ const AppLayoutComponent = () => {
     </div>
   );
 };
-
-export const AppLayout = memo(AppLayoutComponent);

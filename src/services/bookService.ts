@@ -1,14 +1,13 @@
 // src/services/bookService.ts
 import { axiosInstance } from './axiosInstance';
-import type { IBook, IBookPayload } from '../types/book';
+import type { IBook, IBookListParams, IBookPayload } from '../types/book';
 import type { IResponseEntity } from '../types/api';
 
 export const fetchBooks = async (
-  page: number,
-  limit: number,
+  params: IBookListParams,
 ): Promise<IResponseEntity<IBook[]>> => {
   const res = await axiosInstance.get<IResponseEntity<IBook[]>>('/books', {
-    params: { page, limit },
+    params,
   });
   return res.data;
 };

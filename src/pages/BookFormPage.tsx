@@ -1,12 +1,12 @@
 // src/pages/BookFormPage.tsx
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Alert, App as AntApp, Button, Form, Input, Spin } from 'antd';
 import { createBook, fetchBookById, updateBook } from '../services/bookService';
-import { NoticeBanner } from '../components/NoticeBanner';
 
 // Skema validasi catatan — semua pesan error dikendalikan Zod
 const bookSchema = z.object({
@@ -24,11 +24,14 @@ type BookFormValues = z.infer<typeof bookSchema>;
 
 const BookFormPage = () => {
   const { id } = useParams<{ id: string }>();
-  const bookId = id ? Number(id) : null;
+  const rawId = id ? Number(id) : null;
+  const isInvalidId =
+    rawId !== null && (!Number.isInteger(rawId) || rawId <= 0);
+  const bookId = isInvalidId ? null : rawId;
   const isEdit = bookId !== null;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [notice, setNotice] = useState<string | null>(null);
+  const { message } = AntApp.useApp();
 
   // Ambil data lama saat mode edit (dinonaktifkan saat tambah)
   const { data: detail, isPending: isLoadingDetail } = useQuery({
@@ -38,10 +41,10 @@ const BookFormPage = () => {
   });
 
   const {
-    register,
+    control,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<BookFormValues>({
     resolver: zodResolver(bookSchema),
     defaultValues: {
@@ -63,8 +66,11 @@ const BookFormPage = () => {
     mutationFn: (values: BookFormValues) =>
       isEdit ? updateBook(Number(bookId), values) : createBook(values),
     onSuccess: async (response) => {
-      setNotice(response.message);
+      message.success(response.message);
       await queryClient.invalidateQueries({ queryKey: ['books'] });
+      if (isEdit && bookId) {
+        await queryClient.invalidateQueries({ queryKey: ['book', bookId] });
+      }
       if (!isEdit) {
         // Setelah tambah, kembali ke list
         navigate('/', { replace: true });
@@ -74,12 +80,18 @@ const BookFormPage = () => {
 
   const onSubmit = (values: BookFormValues) => mutation.mutate(values);
 
-  if (isEdit && isLoadingDetail) {
-    return <p className="text-sm text-gray-500">Memuat data catatan...</p>;
+  // Id buku bukan angka valid → lempar ke halaman utama
+  if (isInvalidId) {
+    return <Navigate to="/" replace />;
   }
 
-  const inputClass =
-    'w-full rounded-md border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none';
+  if (isEdit && isLoadingDetail) {
+    return (
+      <div className="flex justify-center py-12">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-lg">
@@ -92,95 +104,107 @@ const BookFormPage = () => {
         </Link>
       </div>
 
-      <div className="mb-4 space-y-2">
-        {notice && <NoticeBanner tone="success" message={notice} />}
-        {mutation.isError && (
-          <NoticeBanner tone="error" message={mutation.error.message} />
-        )}
-      </div>
+      {mutation.isError && (
+        <Alert
+          className="mb-4"
+          type="error"
+          showIcon
+          message={mutation.error.message}
+        />
+      )}
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4 rounded-lg border bg-white p-6 shadow-sm"
+      <Form
+        layout="vertical"
+        onFinish={() => handleSubmit(onSubmit)()}
+        className="rounded-lg border bg-white p-6 shadow-sm"
       >
-        <div>
-          <label htmlFor="title" className="mb-1 block text-sm text-gray-700">
-            Judul
-          </label>
-          <input
-            id="title"
-            type="text"
-            className={inputClass}
-            {...register('title')}
-          />
-          {errors.title && (
-            <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>
+        <Controller
+          name="title"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Form.Item
+              label="Judul"
+              validateStatus={fieldState.error ? 'error' : undefined}
+              help={fieldState.error?.message}
+            >
+              <Input id="title" type="text" {...field} />
+            </Form.Item>
           )}
-        </div>
+        />
 
-        <div>
-          <label htmlFor="author" className="mb-1 block text-sm text-gray-700">
-            Penulis
-          </label>
-          <input
-            id="author"
-            type="text"
-            className={inputClass}
-            {...register('author')}
-          />
-          {errors.author && (
-            <p className="mt-1 text-xs text-red-600">{errors.author.message}</p>
+        <Controller
+          name="author"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Form.Item
+              label="Penulis"
+              validateStatus={fieldState.error ? 'error' : undefined}
+              help={fieldState.error?.message}
+            >
+              <Input id="author" type="text" {...field} />
+            </Form.Item>
           )}
-        </div>
+        />
 
-        <div>
-          <label htmlFor="year" className="mb-1 block text-sm text-gray-700">
-            Tahun
-          </label>
-          <input
-            id="year"
-            type="number"
-            className={inputClass}
-            {...register('year', { valueAsNumber: true })}
-          />
-          {errors.year && (
-            <p className="mt-1 text-xs text-red-600">{errors.year.message}</p>
+        <Controller
+          name="year"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Form.Item
+              label="Tahun"
+              validateStatus={fieldState.error ? 'error' : undefined}
+              help={fieldState.error?.message}
+            >
+              <Input
+                id="year"
+                type="number"
+                {...field}
+                value={
+                  typeof field.value === 'number' && Number.isNaN(field.value)
+                    ? ''
+                    : field.value
+                }
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  field.onChange(raw === '' ? NaN : Number(raw));
+                }}
+              />
+            </Form.Item>
           )}
-        </div>
+        />
 
-        <div>
-          <label
-            htmlFor="category"
-            className="mb-1 block text-sm text-gray-700"
-          >
-            Kategori
-          </label>
-          <input
-            id="category"
-            type="text"
-            placeholder="Contoh: Teknologi"
-            className={inputClass}
-            {...register('category')}
-          />
-          {errors.category && (
-            <p className="mt-1 text-xs text-red-600">
-              {errors.category.message}
-            </p>
+        <Controller
+          name="category"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Form.Item
+              label="Kategori"
+              validateStatus={fieldState.error ? 'error' : undefined}
+              help={fieldState.error?.message}
+            >
+              <Input
+                id="category"
+                type="text"
+                placeholder="Contoh: Teknologi"
+                {...field}
+              />
+            </Form.Item>
           )}
-        </div>
+        />
 
-        <button
-          type="submit"
-          disabled={isSubmitting || mutation.isPending}
-          className="w-full rounded-md bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+        <Button
+          type="primary"
+          htmlType="submit"
+          block
+          loading={isSubmitting || mutation.isPending}
         >
           {mutation.isPending
             ? 'Menyimpan...'
             : isEdit
               ? 'Simpan Perubahan'
               : 'Tambah Catatan'}
-        </button>
-      </form>
+        </Button>
+      </Form>
     </div>
   );
 };

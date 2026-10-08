@@ -12,10 +12,10 @@ dist
 dist-ssr
 *.local
 
-# Rahasia & dokumen wajib (aturan mutlak required/00_Context.md §4)
+# Rahasia (Required folder tambahan untuk ai)
 .env
 .env.*
-.env.example
+!.env.example
 required/
 
 # Editor directories and files

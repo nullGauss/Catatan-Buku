@@ -1,75 +1,68 @@
-# React + TypeScript + Vite
+# Catatan Buku — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplikasi CRUD catatan buku untuk latihan PKL di PT. LSKK. Frontend React + TypeScript yang berjalan penuh tanpa backend memakai **mock adapter** lokal.
 
-Currently, two official plugins are available:
+## Fitur
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Login (mock) dengan proteksi route
+- Tambah, edit, hapus, dan daftar catatan buku
+- Pagination server side (React Data Grid + tombol halaman)
+- Validasi form dengan Zod (pesan error berbahasa Indonesia)
+- Cache data dengan React Query (staleTime 30 detik)
+- UI Ant Design + Tailwind CSS
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+React 19 · TypeScript · Vite · Ant Design · MUI X Data Grid · TanStack React Query · Zustand · React Hook Form · Zod · Axios · Tailwind CSS
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Clone repo dan install dependency:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+   ```bash
+   git clone https://github.com/nullGauss/Catatan-Buku.git
+   cd Catatan-Buku
+   npm install
+   ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+2. Salin file env lalu sesuaikan bila perlu:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+   ```bash
+   copy .env.example .env
+   ```
 
-```
+   | Variabel            | Keterangan                                    | Default                      |
+   | ------------------- | --------------------------------------------- | ---------------------------- |
+   | `VITE_API_BASE_URL` | Base URL API backend                          | `http://localhost:8000/api/v1` |
+   | `VITE_APP_NAME`     | Nama aplikasi (ditampilkan di header)         | `Catatan Buku`               |
+   | `VITE_USE_MOCK`     | `true` = pakai mock lokal, `false` = ke backend | `true`                     |
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+3. Jalankan development server:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+   ```bash
+   npm run dev
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+   Buka `http://localhost:5173`.
+
+## Mode Mock
+
+Selama `VITE_USE_MOCK=true`, seluruh request diarahkan ke mock adapter lokal di `src/services/mockAdapter.ts` — tidak perlu backend berjalan. Akun demo **hanya ditampilkan di halaman login** saat mode mock aktif:
 
 ```
+Email    : admin@gmail.com
+Password : rahasia123
+```
+
+Untuk memakai backend sungguhan, set `VITE_USE_MOCK=false` dan isi `VITE_API_BASE_URL` dengan alamat backend yang benar.
+
+## Scripts
+
+| Perintah             | Fungsi                                    |
+| -------------------- | ----------------------------------------- |
+| `npm run dev`        | Jalankan dev server (Vite)                |
+| `npm run build`      | Type check (`tsc -b`) lalu build produksi |
+| `npm run preview`    | Pratinjau hasil build                     |
+| `npm run lint`       | Jalankan ESLint                           |
+| `npm run format`     | Format kode dengan Prettier              |
+| `npm run format:check` | Cek format tanpa menulis file           |
