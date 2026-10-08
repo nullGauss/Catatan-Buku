@@ -1,12 +1,12 @@
 // src/pages/BookFormPage.tsx
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Alert, App as AntApp, Button, Form, Input, Spin } from 'antd';
 import { createBook, fetchBookById, updateBook } from '../services/bookService';
-import { NoticeBanner } from '../components/NoticeBanner';
 
 // Skema validasi catatan — semua pesan error dikendalikan Zod
 const bookSchema = z.object({
@@ -28,7 +28,7 @@ const BookFormPage = () => {
   const isEdit = bookId !== null;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [notice, setNotice] = useState<string | null>(null);
+  const { message } = AntApp.useApp();
 
   // Ambil data lama saat mode edit (dinonaktifkan saat tambah)
   const { data: detail, isPending: isLoadingDetail } = useQuery({
@@ -63,7 +63,7 @@ const BookFormPage = () => {
     mutationFn: (values: BookFormValues) =>
       isEdit ? updateBook(Number(bookId), values) : createBook(values),
     onSuccess: async (response) => {
-      setNotice(response.message);
+      message.success(response.message);
       await queryClient.invalidateQueries({ queryKey: ['books'] });
       if (!isEdit) {
         // Setelah tambah, kembali ke list
@@ -75,11 +75,12 @@ const BookFormPage = () => {
   const onSubmit = (values: BookFormValues) => mutation.mutate(values);
 
   if (isEdit && isLoadingDetail) {
-    return <p className="text-sm text-gray-500">Memuat data catatan...</p>;
+    return (
+      <div className="flex justify-center py-12">
+        <Spin size="large" />
+      </div>
+    );
   }
-
-  const inputClass =
-    'w-full rounded-md border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none';
 
   return (
     <div className="mx-auto max-w-lg">
@@ -92,95 +93,74 @@ const BookFormPage = () => {
         </Link>
       </div>
 
-      <div className="mb-4 space-y-2">
-        {notice && <NoticeBanner tone="success" message={notice} />}
-        {mutation.isError && (
-          <NoticeBanner tone="error" message={mutation.error.message} />
-        )}
-      </div>
+      {mutation.isError && (
+        <Alert
+          className="mb-4"
+          type="error"
+          showIcon
+          message={mutation.error.message}
+        />
+      )}
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4 rounded-lg border bg-white p-6 shadow-sm"
+      <Form
+        layout="vertical"
+        onFinish={() => handleSubmit(onSubmit)()}
+        className="rounded-lg border bg-white p-6 shadow-sm"
       >
-        <div>
-          <label htmlFor="title" className="mb-1 block text-sm text-gray-700">
-            Judul
-          </label>
-          <input
-            id="title"
-            type="text"
-            className={inputClass}
-            {...register('title')}
-          />
-          {errors.title && (
-            <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>
-          )}
-        </div>
+        <Form.Item
+          label="Judul"
+          validateStatus={errors.title ? 'error' : undefined}
+          help={errors.title?.message}
+        >
+          <Input id="title" type="text" {...register('title')} />
+        </Form.Item>
 
-        <div>
-          <label htmlFor="author" className="mb-1 block text-sm text-gray-700">
-            Penulis
-          </label>
-          <input
-            id="author"
-            type="text"
-            className={inputClass}
-            {...register('author')}
-          />
-          {errors.author && (
-            <p className="mt-1 text-xs text-red-600">{errors.author.message}</p>
-          )}
-        </div>
+        <Form.Item
+          label="Penulis"
+          validateStatus={errors.author ? 'error' : undefined}
+          help={errors.author?.message}
+        >
+          <Input id="author" type="text" {...register('author')} />
+        </Form.Item>
 
-        <div>
-          <label htmlFor="year" className="mb-1 block text-sm text-gray-700">
-            Tahun
-          </label>
-          <input
+        <Form.Item
+          label="Tahun"
+          validateStatus={errors.year ? 'error' : undefined}
+          help={errors.year?.message}
+        >
+          <Input
             id="year"
             type="number"
-            className={inputClass}
             {...register('year', { valueAsNumber: true })}
           />
-          {errors.year && (
-            <p className="mt-1 text-xs text-red-600">{errors.year.message}</p>
-          )}
-        </div>
+        </Form.Item>
 
-        <div>
-          <label
-            htmlFor="category"
-            className="mb-1 block text-sm text-gray-700"
-          >
-            Kategori
-          </label>
-          <input
+        <Form.Item
+          label="Kategori"
+          validateStatus={errors.category ? 'error' : undefined}
+          help={errors.category?.message}
+        >
+          <Input
             id="category"
             type="text"
             placeholder="Contoh: Teknologi"
-            className={inputClass}
             {...register('category')}
           />
-          {errors.category && (
-            <p className="mt-1 text-xs text-red-600">
-              {errors.category.message}
-            </p>
-          )}
-        </div>
+        </Form.Item>
 
-        <button
-          type="submit"
-          disabled={isSubmitting || mutation.isPending}
-          className="w-full rounded-md bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+        <Button
+          type="primary"
+          htmlType="submit"
+          block
+          loading={isSubmitting || mutation.isPending}
         >
           {mutation.isPending
             ? 'Menyimpan...'
             : isEdit
               ? 'Simpan Perubahan'
               : 'Tambah Catatan'}
-        </button>
-      </form>
+        </Button>
+      </Form>
     </div>
   );
 };

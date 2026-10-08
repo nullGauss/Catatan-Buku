@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Alert, Button, Form, Input } from 'antd';
 import { loginService } from '../services/authService';
 import { useAuthStore } from '../store/authStore';
-import { NoticeBanner } from '../components/NoticeBanner';
 
 // Skema validasi login — pesan error dikendalikan Zod (satu sumber kebenaran)
 const loginSchema = z.object({
@@ -56,61 +56,46 @@ const LoginPage = () => {
         </p>
 
         {errorMessage && (
-          <div className="mb-4">
-            <NoticeBanner tone="error" message={errorMessage} />
-          </div>
+          <Alert
+            className="mb-4"
+            type="error"
+            showIcon
+            message={errorMessage}
+          />
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="mb-1 block text-sm text-gray-700">
-              Email
-            </label>
-            <input
+        <Form layout="vertical" onFinish={() => handleSubmit(onSubmit)()}>
+          <Form.Item
+            label="Email"
+            validateStatus={errors.email ? 'error' : undefined}
+            help={errors.email?.message}
+          >
+            <Input
               id="email"
               type="email"
               autoComplete="email"
               placeholder="email@domain.com"
-              className="w-full rounded-md border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               {...register('email')}
             />
-            {errors.email && (
-              <p className="mt-1 text-xs text-red-600">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
+          </Form.Item>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-1 block text-sm text-gray-700"
-            >
-              Password
-            </label>
-            <input
+          <Form.Item
+            label="Password"
+            validateStatus={errors.password ? 'error' : undefined}
+            help={errors.password?.message}
+          >
+            <Input.Password
               id="password"
-              type="password"
               autoComplete="current-password"
               placeholder="********"
-              className="w-full rounded-md border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               {...register('password')}
             />
-            {errors.password && (
-              <p className="mt-1 text-xs text-red-600">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
+          </Form.Item>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full rounded-md bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-          >
+          <Button type="primary" htmlType="submit" block loading={isSubmitting}>
             {isSubmitting ? 'Memproses...' : 'Masuk'}
-          </button>
-        </form>
+          </Button>
+        </Form>
       </div>
     </div>
   );
