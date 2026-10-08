@@ -1,7 +1,7 @@
 // src/pages/LoginPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Alert, Button, Form, Input } from 'antd';
@@ -24,9 +24,9 @@ const LoginPage = () => {
   const login = useAuthStore((state) => state.login);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const {
-    register,
+    control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
@@ -65,32 +65,44 @@ const LoginPage = () => {
         )}
 
         <Form layout="vertical" onFinish={() => handleSubmit(onSubmit)()}>
-          <Form.Item
-            label="Email"
-            validateStatus={errors.email ? 'error' : undefined}
-            help={errors.email?.message}
-          >
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="email@domain.com"
-              {...register('email')}
-            />
-          </Form.Item>
+          <Controller
+            name="email"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Form.Item
+                label="Email"
+                validateStatus={fieldState.error ? 'error' : undefined}
+                help={fieldState.error?.message}
+              >
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="email@domain.com"
+                  {...field}
+                />
+              </Form.Item>
+            )}
+          />
 
-          <Form.Item
-            label="Password"
-            validateStatus={errors.password ? 'error' : undefined}
-            help={errors.password?.message}
-          >
-            <Input.Password
-              id="password"
-              autoComplete="current-password"
-              placeholder="********"
-              {...register('password')}
-            />
-          </Form.Item>
+          <Controller
+            name="password"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Form.Item
+                label="Password"
+                validateStatus={fieldState.error ? 'error' : undefined}
+                help={fieldState.error?.message}
+              >
+                <Input.Password
+                  id="password"
+                  autoComplete="current-password"
+                  placeholder="********"
+                  {...field}
+                />
+              </Form.Item>
+            )}
+          />
 
           <Button type="primary" htmlType="submit" block loading={isSubmitting}>
             {isSubmitting ? 'Memproses...' : 'Masuk'}

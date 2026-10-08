@@ -1,7 +1,7 @@
 // src/pages/BookFormPage.tsx
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -38,10 +38,10 @@ const BookFormPage = () => {
   });
 
   const {
-    register,
+    control,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<BookFormValues>({
     resolver: zodResolver(bookSchema),
     defaultValues: {
@@ -107,46 +107,79 @@ const BookFormPage = () => {
         onFinish={() => handleSubmit(onSubmit)()}
         className="rounded-lg border bg-white p-6 shadow-sm"
       >
-        <Form.Item
-          label="Judul"
-          validateStatus={errors.title ? 'error' : undefined}
-          help={errors.title?.message}
-        >
-          <Input id="title" type="text" {...register('title')} />
-        </Form.Item>
+        <Controller
+          name="title"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Form.Item
+              label="Judul"
+              validateStatus={fieldState.error ? 'error' : undefined}
+              help={fieldState.error?.message}
+            >
+              <Input id="title" type="text" {...field} />
+            </Form.Item>
+          )}
+        />
 
-        <Form.Item
-          label="Penulis"
-          validateStatus={errors.author ? 'error' : undefined}
-          help={errors.author?.message}
-        >
-          <Input id="author" type="text" {...register('author')} />
-        </Form.Item>
+        <Controller
+          name="author"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Form.Item
+              label="Penulis"
+              validateStatus={fieldState.error ? 'error' : undefined}
+              help={fieldState.error?.message}
+            >
+              <Input id="author" type="text" {...field} />
+            </Form.Item>
+          )}
+        />
 
-        <Form.Item
-          label="Tahun"
-          validateStatus={errors.year ? 'error' : undefined}
-          help={errors.year?.message}
-        >
-          <Input
-            id="year"
-            type="number"
-            {...register('year', { valueAsNumber: true })}
-          />
-        </Form.Item>
+        <Controller
+          name="year"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Form.Item
+              label="Tahun"
+              validateStatus={fieldState.error ? 'error' : undefined}
+              help={fieldState.error?.message}
+            >
+              <Input
+                id="year"
+                type="number"
+                {...field}
+                value={
+                  typeof field.value === 'number' && Number.isNaN(field.value)
+                    ? ''
+                    : field.value
+                }
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  field.onChange(raw === '' ? NaN : Number(raw));
+                }}
+              />
+            </Form.Item>
+          )}
+        />
 
-        <Form.Item
-          label="Kategori"
-          validateStatus={errors.category ? 'error' : undefined}
-          help={errors.category?.message}
-        >
-          <Input
-            id="category"
-            type="text"
-            placeholder="Contoh: Teknologi"
-            {...register('category')}
-          />
-        </Form.Item>
+        <Controller
+          name="category"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Form.Item
+              label="Kategori"
+              validateStatus={fieldState.error ? 'error' : undefined}
+              help={fieldState.error?.message}
+            >
+              <Input
+                id="category"
+                type="text"
+                placeholder="Contoh: Teknologi"
+                {...field}
+              />
+            </Form.Item>
+          )}
+        />
 
         <Button
           type="primary"
