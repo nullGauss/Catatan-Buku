@@ -17,7 +17,7 @@ const BookListPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data, isFetching, isError, error } = useQuery({
+  const { data, isFetching, isError, error, isPlaceholderData } = useQuery({
     queryKey: ['books', page, PAGE_SIZE],
     queryFn: () => fetchBooks(page, PAGE_SIZE),
     placeholderData: (previousData) => previousData,
@@ -36,22 +36,44 @@ const BookListPage = () => {
 
   const columns = useMemo<GridColDef<IBook>[]>(
     () => [
-      { field: 'title', headerName: 'Judul', flex: 1, minWidth: 160 },
-      { field: 'author', headerName: 'Penulis', flex: 1, minWidth: 130 },
+      {
+        field: 'title',
+        headerName: 'Judul',
+        sortable: false,
+        flex: 1.6,
+        minWidth: 180,
+      },
+      {
+        field: 'author',
+        headerName: 'Penulis',
+        sortable: false,
+        flex: 1.6,
+        minWidth: 180,
+      },
       {
         field: 'year',
         headerName: 'Tahun',
         type: 'number',
-        flex: 0.5,
-        minWidth: 90,
+        align: 'left',
+        sortable: false,
+        flex: 0.7,
+        minWidth: 100,
+        valueFormatter: (value) => String(value),
       },
-      { field: 'category', headerName: 'Kategori', flex: 0.8, minWidth: 120 },
+      {
+        field: 'category',
+        headerName: 'Kategori',
+        sortable: false,
+        flex: 1.7,
+        minWidth: 180,
+      },
       {
         field: 'actions',
         headerName: 'Aksi',
+        align: 'left',
         sortable: false,
         filterable: false,
-        flex: 0.7,
+        flex: 1,
         minWidth: 150,
         renderCell: (params) => (
           <span className="flex items-center gap-2">
@@ -111,14 +133,45 @@ const BookListPage = () => {
           pageSizeOptions={[PAGE_SIZE]}
           autoHeight
           disableRowSelectionOnClick
-          hideFooterSelectedRowCount
-          localeText={{ noRowsLabel: 'Belum ada catatan.' }}
+          disableColumnMenu
+          hideFooter
+          localeText={{
+            noRowsLabel: 'Belum ada catatan.',
+            paginationRowsPerPage: 'Baris per halaman:',
+            paginationDisplayedRows: ({ from, to, count }) =>
+              count === null || count === -1
+                ? `${from}–${to}`
+                : `${from}–${to} dari ${count}`,
+            paginationItemAriaLabel: (type) => {
+              if (type === 'first') return 'Ke halaman pertama';
+              if (type === 'last') return 'Ke halaman terakhir';
+              if (type === 'next') return 'Ke halaman berikutnya';
+              return 'Ke halaman sebelumnya';
+            },
+          }}
         />
       </div>
 
-      <p className="mt-2 text-sm text-gray-500">
-        Total {meta?.totalData ?? 0} data
-      </p>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span className="text-gray-500">
+          Halaman {meta?.page ?? page} dari {meta?.totalPages ?? 1} · Total{' '}
+          {meta?.totalData ?? 0} data
+        </span>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            disabled={page <= 1 || isPlaceholderData}
+          >
+            Sebelumnya
+          </Button>
+          <Button
+            onClick={() => setPage((current) => current + 1)}
+            disabled={page >= (meta?.totalPages ?? 1) || isPlaceholderData}
+          >
+            Berikutnya
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
