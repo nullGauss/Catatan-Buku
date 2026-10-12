@@ -1,0 +1,20 @@
+# Normalisasi line ending: semua file teks disimpan LF di repo
+# dan ditulis LF di working tree (berlaku di semua OS).
+# Tujuan: mencegah `npm run format:check` gagal karena CRLF di Windows,
+# terutama setelah clone ulang di mesin baru.
+* text=auto eol=lf
+
+# File biner harus tetap apa adanya (tidak pernah dikonversi line ending)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.pdf binary
+*.zip binary
