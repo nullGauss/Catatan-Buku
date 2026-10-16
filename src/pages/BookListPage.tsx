@@ -141,26 +141,13 @@ const BookListPage = () => {
           loading={isFetching || isDeleting}
           paginationMode="server"
           rowCount={meta?.totalData ?? 0}
-          paginationModel={{ page: page - 1, pageSize: PAGE_SIZE }}
-          onPaginationModelChange={(model) => setPage(model.page + 1)}
-          pageSizeOptions={[PAGE_SIZE]}
           autoHeight
           disableRowSelectionOnClick
+          // Pagination diurus manual di bawah DataGrid (tombol Sebelumnya/
+          // Berikutnya + info halaman), sehingga footer bawaan disembunyikan
+          // dan props pagination bawaan sengaja tidak dipakai.
           hideFooter
-          localeText={{
-            noRowsLabel: 'Belum ada catatan.',
-            paginationRowsPerPage: 'Baris per halaman:',
-            paginationDisplayedRows: ({ from, to, count }) =>
-              count === null || count === -1
-                ? `${from}–${to}`
-                : `${from}–${to} dari ${count}`,
-            paginationItemAriaLabel: (type) => {
-              if (type === 'first') return 'Ke halaman pertama';
-              if (type === 'last') return 'Ke halaman terakhir';
-              if (type === 'next') return 'Ke halaman berikutnya';
-              return 'Ke halaman sebelumnya';
-            },
-          }}
+          localeText={{ noRowsLabel: 'Belum ada catatan.' }}
         />
       </div>
 
