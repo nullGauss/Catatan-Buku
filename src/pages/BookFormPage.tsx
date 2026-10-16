@@ -5,7 +5,15 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, App as AntApp, Button, Form, Input, Spin } from 'antd';
+import {
+  Alert,
+  App as AntApp,
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Spin,
+} from 'antd';
 import { createBook, fetchBookById, updateBook } from '../services/bookService';
 
 // Skema validasi catatan — semua pesan error dikendalikan Zod
@@ -155,19 +163,19 @@ const BookFormPage = () => {
               validateStatus={fieldState.error ? 'error' : undefined}
               help={fieldState.error?.message}
             >
-              <Input
+              {/* InputNumber menyerahkan number | null langsung di onChange,
+                  jadi konversi manual NaN -> '' seperti pada Input type="number"
+                  tidak diperlukan. min/max/precision ditangani antd. */}
+              <InputNumber
                 id="year"
-                type="number"
-                {...field}
-                value={
-                  typeof field.value === 'number' && Number.isNaN(field.value)
-                    ? ''
-                    : field.value
-                }
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  field.onChange(raw === '' ? NaN : Number(raw));
-                }}
+                className="w-full"
+                min={1900}
+                max={2100}
+                precision={0}
+                placeholder="Contoh: 2024"
+                value={field.value ?? null}
+                onChange={(value) => field.onChange(value)}
+                onBlur={field.onBlur}
               />
             </Form.Item>
           )}
