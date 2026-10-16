@@ -55,14 +55,14 @@ const BookListPage = () => {
       {
         field: 'title',
         headerName: 'Judul',
-        sortable: false,
+        sortable: true,
         flex: 1.6,
         minWidth: 180,
       },
       {
         field: 'author',
         headerName: 'Penulis',
-        sortable: false,
+        sortable: true,
         flex: 1.6,
         minWidth: 180,
       },
@@ -71,7 +71,8 @@ const BookListPage = () => {
         headerName: 'Tahun',
         type: 'number',
         align: 'left',
-        sortable: false,
+        headerAlign: 'left',
+        sortable: true,
         flex: 0.7,
         minWidth: 100,
         valueFormatter: (value) => String(value),
@@ -79,7 +80,7 @@ const BookListPage = () => {
       {
         field: 'category',
         headerName: 'Kategori',
-        sortable: false,
+        sortable: true,
         flex: 1.7,
         minWidth: 180,
       },
@@ -87,6 +88,7 @@ const BookListPage = () => {
         field: 'actions',
         headerName: 'Aksi',
         align: 'left',
+        headerAlign: 'left',
         sortable: false,
         filterable: false,
         flex: 1,
@@ -144,7 +146,6 @@ const BookListPage = () => {
           pageSizeOptions={[PAGE_SIZE]}
           autoHeight
           disableRowSelectionOnClick
-          disableColumnMenu
           hideFooter
           localeText={{
             noRowsLabel: 'Belum ada catatan.',
